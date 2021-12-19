@@ -3,7 +3,7 @@ interface Values {
     weight: number;
 }
 
-const parseArguments = (args: Array<string>): Values => {
+const parseArgumentsBmi = (args: Array<string>): Values => {
     if (args.length < 4) throw new Error('Not enough arguments');
     if (args.length > 4) throw new Error('Too many arguments');
   
@@ -17,7 +17,7 @@ const parseArguments = (args: Array<string>): Values => {
     }
 };
 
-export const calculateBmi = (height: number, weight: number): string => {
+const calculateBmi = (height: number, weight: number): string => {
     if (height === 0 || weight === 0) throw new Error('Height and weight cannot be value 0');
     
     const bmi = (weight / height ** 2) * 10000;
@@ -42,14 +42,22 @@ export const calculateBmi = (height: number, weight: number): string => {
         throw new Error();
     }
 };
-
-try {
-    const { height, weight } = parseArguments(process.argv);
-    console.log(calculateBmi(height, weight));
-} catch (error: unknown) {
-    let errorMessage = 'Something went wrong.';
-    if (error instanceof Error) {
-      errorMessage += ' Error: ' + error.message;
+/*
+*   if block for preventing error message, when the script 'npm run dev' or 'npm start' is executed
+*   i.e. only execute the try-catch block if the file is executed directly from commandline
+*   otherwise 'not enough arguments' errormessage is always shown when the scripts are ran
+*/
+if (require.main === module) {
+    try {
+        const { height, weight } = parseArgumentsBmi(process.argv);
+        console.log(calculateBmi(height, weight));
+    } catch (error: unknown) {
+        let errorMessage = 'Something went wrong.';
+        if (error instanceof Error) {
+        errorMessage += ' Error: ' + error.message;
+        }
+        console.log(errorMessage);
     }
-    console.log(errorMessage);
 }
+
+export default calculateBmi;

@@ -1,12 +1,8 @@
 import React from 'react';
-
-interface CourseParts {
-    name: string;
-    exerciseCount: number;
-}
+import { CoursePart } from '../App';
 
 interface TotalProps {
-    parts: CourseParts[];
+    parts: CoursePart[];
 }
 
 const Total = (props: TotalProps) => {
@@ -15,7 +11,7 @@ const Total = (props: TotalProps) => {
             Number of exercises{" "}
             {props.parts.reduce((sum, part) => sum + part.exerciseCount, 0)}
         </div>
-    )
+    );
 };
 
 export default Total;

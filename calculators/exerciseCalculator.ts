@@ -1,9 +1,9 @@
 interface trainingData {
     trainingDays: Array<number>;
     target: number;
-  }
+}
 
-const parseArgumentsV2 = (args: Array<string>): trainingData => {
+const parseArgumentsExercises = (args: Array<string>): trainingData => {
     if (args.length < 4) throw new Error('Not enough arguments');
     if (isNaN(Number(args[2]))) throw new Error('Provided values were not numbers!');
 
@@ -52,7 +52,7 @@ const giveRatingDescription = (rating: number): string => {
     }
 };
 
-export const calculateExercises = (hours: Array<number>, target: number): calculationResult => {
+const calculateExercises = (hours: Array<number>, target: number): calculationResult => {
     const periodLength = hours.length;
     const trainingDays = hours.filter(h => h > 0).length;
     const average = hours.reduce((sum: number, hours: number) => sum + hours, 0) / periodLength;
@@ -71,14 +71,23 @@ export const calculateExercises = (hours: Array<number>, target: number): calcul
         average: average
     };
 };
-
-try {
-    const { trainingDays, target } = parseArgumentsV2(process.argv);
-    console.log(calculateExercises(trainingDays, target));
-} catch (error: unknown) {
-    let errorMessage = 'Something went wrong.';
-    if (error instanceof Error) {
-      errorMessage += ' Error: ' + error.message;
+/*
+*   if block for preventing error message, when the script 'npm run dev' or 'npm start' is executed
+*   i.e. only execute the try-catch block if the file is executed directly from commandline
+*   otherwise 'not enough arguments' errormessage is always shown when the scripts are ran
+*/
+if (require.main === module) {
+    try {
+        const { trainingDays, target } = parseArgumentsExercises(process.argv);
+        console.log(calculateExercises(trainingDays, target));
+    } catch (error: unknown) {
+        console.log('called directly');   
+        let errorMessage = 'Something went wrong.';
+        if (error instanceof Error) {
+            errorMessage += ' Error: ' + error.message;
+        }
+        console.log(errorMessage);
     }
-    console.log(errorMessage);
 }
+
+export default calculateExercises;
