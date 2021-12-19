@@ -3,7 +3,7 @@ interface BaseEntry {
     date: string;
     specialist: string;
     description: string;
-    diagnosisCodes?: Array<Diagnosis['code']>;
+    diagnosisCodes?: Array<Diagnose['code']>;
 }
 
 interface HealthCheckEntry extends BaseEntry {
@@ -40,14 +40,12 @@ export type NewEntry =
   | NewOccupationalHealthcareEntry
   | NewHealthCheckEntry;
 
-
-  
 export interface Patient {
     id: string;
     name: string;
     dateOfBirth: string;
     ssn: string;
-    gender: string;
+    gender: Gender;
     occupation: string;
     entries: Entry[];
 }
@@ -58,7 +56,7 @@ export type NonSensitivePatientEntry = Omit<Patient, 'ssn'>;
 
 export type NewPatientEntry = Omit<Patient, 'id'>;
 
-export interface Diagnosis {
+export interface Diagnose {
     code: string;
     name: string;
     latin?: string;

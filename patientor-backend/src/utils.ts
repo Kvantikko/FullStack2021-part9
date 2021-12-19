@@ -32,15 +32,13 @@ const parseName = (name: unknown): string => {
 
 const parseOccupation = (occupation: unknown): string => {
     if (!occupation || !isString(occupation)) {
-        throw new Error('Incorrect or missing occupation');
+        throw new Error('Incorrect or missing occupation ');
     }
   
     return occupation;
 };
 
 const isDate = (date: string): boolean => {
-    console.log('datetest ', Boolean(Date.parse(date)));
-    
     return Boolean(Date.parse(date));
   };
 
@@ -54,7 +52,6 @@ const parseDate = (dateOfBirth: unknown): string => {
 // https://github.com/vkomulai/finnish-ssn
 const isSsn = (ssn: string): boolean => {
     if ( !FinnishSSN.validate(ssn) ) return false;
-    
     return true;
 };
 
@@ -66,10 +63,10 @@ const parseSsn = (ssn: unknown): string => {
             'The code is using validator from https://github.com/vkomulai/finnish-ssn'
         );
     }
-    
     return ssn;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isGender = (param: any): param is Gender => {
     return Object.values(Gender).includes(param);
 };
