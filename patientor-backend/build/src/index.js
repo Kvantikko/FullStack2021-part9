@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const diagnoses_1 = __importDefault(require("./routes/diagnoses"));
 const patients_1 = __importDefault(require("./routes/patients"));
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const cors = require('cors');
 const app = (0, express_1.default)();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 app.use(cors());
 app.use(express_1.default.json());
 const PORT = 3001;

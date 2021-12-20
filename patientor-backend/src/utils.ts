@@ -1,7 +1,7 @@
-import { NewPatientEntry, Gender, Entry, NewEntry, NewBaseEntry, HealthCheckRating } from './types';
-import { FinnishSSN } from 'finnish-ssn'
+import { NewPatientEntry, Gender, Entry, NewEntry, NewBaseEntry, HealthCheckRating, Sickleave, Discharge } from './types';
+import { FinnishSSN } from 'finnish-ssn';
 
-type PatientFields = { name: unknown, dateOfBirth: unknown, ssn: unknown, gender: unknown, occupation: unknown, entries: unknown }
+type PatientFields = { name: unknown, dateOfBirth: unknown, ssn: unknown, gender: unknown, occupation: unknown, entries: unknown };
 
 export const toNewPatientEntry = ({ name, dateOfBirth, ssn, gender, occupation, entries } : PatientFields): NewPatientEntry => {
     const newEntry: NewPatientEntry = {
@@ -17,10 +17,8 @@ export const toNewPatientEntry = ({ name, dateOfBirth, ssn, gender, occupation, 
 };
 
 const isString = (text: unknown): text is string => {
-    console.log('isString ', text);
-    
     return typeof text === 'string' || text instanceof String;
-}
+};
 
 const parseName = (name: unknown): string => {
     if (!name || !isString(name)) {
@@ -47,7 +45,7 @@ const parseDate = (dateOfBirth: unknown): string => {
         throw new Error('Incorrect or missing date ' + dateOfBirth);
     }
     return dateOfBirth;
-}
+};
 
 // https://github.com/vkomulai/finnish-ssn
 const isSsn = (ssn: string): boolean => {
@@ -64,7 +62,7 @@ const parseSsn = (ssn: unknown): string => {
         );
     }
     return ssn;
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isGender = (param: any): param is Gender => {
@@ -77,13 +75,15 @@ const parseGender = (gender: unknown): Gender => {
     }
     
     return gender;
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isArray = (param: any): param is Array<any> => {
     return Array.isArray(param);
 };
 
-const isEntries = (array: Array<any>): boolean => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isEntries = (array: Array<any>): array is Array<Entry> => {
     if (array.length === 0) return true;
     
     for(let i = 0; i < array.length; i++) {
@@ -91,24 +91,24 @@ const isEntries = (array: Array<any>): boolean => {
             array[i].type === "OccupationalHealthcare" || 
             array[i].type === "Hospital")
             )   return false;
-    };
+    }
 
     return true;    
 };
 
 const parseEntries = (entries: unknown): Array<Entry> | [] => {
-    if (!entries) return []
+    if (!entries) return [];
     
     if (!isArray(entries) || !isEntries(entries)) {
         throw new Error('Incorrect or missing entries ' + entries);
     }
     return entries;
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toNewEntry = (object: any): NewEntry => {
-    console.log('to new entry: ' , object);
-    
-    const type = object.type
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const type = object.type;
     
     if (!type || !isType(type)) {
         throw new Error('Invalid type!');
@@ -118,10 +118,10 @@ export const toNewEntry = (object: any): NewEntry => {
         date: parseDate(object.date),
         specialist: parseSpecialist(object.specialist),
         description: parseDescription(object.description)
-    }
+    };
 
     if (object.diagnosisCodes) {
-        base.diagnosisCodes = parseDiagnosisCodes(object.diagnosisCodes)
+        base.diagnosisCodes = parseDiagnosisCodes(object.diagnosisCodes);
     }
 
     switch(type) {
@@ -130,90 +130,106 @@ export const toNewEntry = (object: any): NewEntry => {
                 ...base,
                 type: type,
                 healthCheckRating: parseHealthCheckRating(object.healthCheckRating)
-            }
+            };
         case 'OccupationalHealthcare':
             const obj: NewEntry = {
                 ...base,
                 type: type,
                 employerName: parseName(object.employerName),
+            };
+            if (object.sickLeave.startDate && object.sickLeave.endDate) {
+                obj.sickLeave = parseSickLeave(object.sickLeave);
             }
-            if (object.sickLeave.startDate || object.sickLeave.endDate) {
-                obj.sickLeave = parseSickLeave(object.sickLeave)
-            }
-            return obj
+            return obj;
         case 'Hospital':
             return {
                 ...base,
                 type: type,
                 discharge: parseDischarge(object.discharge)
-            }
+            };
         default:
             return assertNever(type);
     }
 };
 
-const isType = (type: any): type is 'HealthCheck' | 'OccupationalHealthcare' | 'Hospital' => {
-    return ['HealthCheck', 'OccupationalHealthcare', 'Hospital'].includes(type)
-}
-
 const assertNever = (value: never): never => {
     throw new Error(`error ${JSON.stringify(value)}`);
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isType = (type: any): type is 'HealthCheck' | 'OccupationalHealthcare' | 'Hospital' => {
+    return ['HealthCheck', 'OccupationalHealthcare', 'Hospital'].includes(type);
+};
+
+
 
 const parseDescription = (description: unknown): string => {
     if (!description || !isString(description)) {
         throw new Error('Incorrect or missing description ' + description);
     }
-    return description
-}
+    return description;
+};
 
 const parseSpecialist = (specialist: unknown): string => {
     if (!specialist || !isString(specialist)) {
         throw new Error('Incorrect or missing specialist ' + specialist);
     }
-    return specialist
-}
+    return specialist;
+};
 
-const isStrings = (array: Array<unknown>): boolean => {
+const isStrings = (array: Array<unknown>): array is string[] => {
     for(let i = 0; i < array.length; i++) {
-        if ( !isString(array[i]) ) return false
-    };
-    return true
-}
+        if ( !isString(array[i]) ) return false;
+    }
+    return true;
+};
 
 const parseDiagnosisCodes = (diagnosisCodes: unknown): string[] => {
     if (!diagnosisCodes || !isArray(diagnosisCodes) || !isStrings(diagnosisCodes)) {
         throw new Error('Incorrect diagnosis codes ' + diagnosisCodes);
     }
-    return diagnosisCodes
-}
+    return diagnosisCodes;
+};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isHealthCheckRating = (param: any): param is HealthCheckRating => {
     return Object.values(HealthCheckRating).includes(param);
-}
+};
 
 const parseHealthCheckRating = (healthCheckRating: unknown): HealthCheckRating => {
     if ( healthCheckRating === null || healthCheckRating === undefined || !isHealthCheckRating(healthCheckRating) ) {
         throw new Error('Incorrect or missing healthCheckRating ' + healthCheckRating);
     }
-    return healthCheckRating
-}
+    return healthCheckRating;
+};
 
-const parseDischarge = (discharge: any): { date: string, criteria: string} => {
-    if ( !discharge || !discharge.date || !discharge.criteria || 
-         !isString(discharge.date) || !isDate(discharge.date)|| !isString(discharge.criteria) ) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isDischarge = (param: any): boolean => {
+    if ( !param.date || !param.criteria || 
+        !isString(param.date) || !isDate(param.date)|| !isString(param.criteria) ) {
+       return false;
+   }
+   return true;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const parseDischarge = (discharge: any): Discharge => {
+    if ( !discharge || !isDischarge(discharge) ) {
         throw new Error('Incorrect or missing discharge ' + discharge);
     }
-    return discharge
-}
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    return { date: discharge.date , criteria: discharge.criteria };
+};
 
-const parseSickLeave = (sickleave: any): { startDate: string, endDate: string } => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const parseSickLeave = (sickleave: any): Sickleave => {
     if ( !sickleave || !sickleave.startDate || !sickleave.endDate || 
          !isString(sickleave.startDate) || !isDate(sickleave.startDate) || 
          !isString(sickleave.endDate) || !isDate(sickleave.endDate) ) {
         throw new Error('Incorrect or missing sickleave ' + sickleave);
     }
-    return sickleave
-}
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    return { startDate: sickleave.startDate, endDate: sickleave.endDate };
+};
 
 export default { toNewPatientEntry, toNewEntry};

@@ -18,11 +18,7 @@ router.get('/:id', (req, res) => {
 router.post('/:id/entries', (req, res) => {
     try {
         const id = req.params.id;
-        console.log('id', id);
-        console.log('body', req.body.entry);
-        console.log('body', req.body);
         const newEntry = (0, utils_1.toNewEntry)(req.body);
-        console.log('new entry ', newEntry);
         const addedEntry = patientService_1.default.addEntry(newEntry, id);
         res.json(addedEntry);
     }
@@ -36,7 +32,9 @@ router.post('/:id/entries', (req, res) => {
 });
 router.post('/', (req, res) => {
     try {
-        const newPatientEntry = (0, utils_1.toNewPatientEntry)(req.body);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const body = req.body;
+        const newPatientEntry = (0, utils_1.toNewPatientEntry)(body);
         const addedEntry = patientService_1.default.addPatient(newPatientEntry);
         res.json(addedEntry);
     }

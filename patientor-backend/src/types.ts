@@ -22,6 +22,16 @@ interface HospitalEntry extends BaseEntry {
     discharge: { date: string, criteria: string}
 }
 
+export interface Discharge {
+    date: string;
+    criteria: string;
+}
+
+export interface Sickleave {
+    startDate: string;
+    endDate: string;
+}
+
 export type Entry =
   | HospitalEntry
   | OccupationalHealthcareEntry
@@ -50,7 +60,7 @@ export interface Patient {
     entries: Entry[];
 }
 
-export type PublicPatient = Omit<Patient, 'ssn' | 'entries' >
+export type PublicPatient = Omit<Patient, 'ssn' | 'entries' >;
 
 export type NonSensitivePatientEntry = Omit<Patient, 'ssn'>;
 
